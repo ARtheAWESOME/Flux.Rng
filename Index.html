@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -46,7 +46,18 @@
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--dim);
+    margin-bottom: 10px;
+  }
+
+  .best-rank {
+    font-size: 12px;
+    color: var(--dim);
     margin-bottom: 28px;
+  }
+
+  .best-rank b {
+    font-weight: 600;
+    transition: color 0.3s ease;
   }
 
   .card {
@@ -158,6 +169,7 @@
 
 <div class="stage">
   <div class="title">Pull</div>
+  <div class="best-rank" id="bestRank">Best pull: <b>—</b></div>
 
   <div class="card" id="card">
     <div class="result" id="result">
@@ -173,19 +185,30 @@
   // "weight" is relative odds: weight 1 vs weight 20 means the weight-1
   // item is 20x rarer. Weights don't need to add to any particular number.
   const pool = [
-    { name: "Common",         rarity: "common",    weight: 175/6,  color: "var(--common)" },
-    { name: "Uncommon",       rarity: "uncommon",  weight: 175/12, color: "var(--uncommon)" },
-    { name: "Rare Item",      rarity: "rare",      weight: 10,     color: "var(--rare)" },
-    { name: "Epic Item",      rarity: "epic",      weight: 4,      color: "var(--epic)" },
-    { name: "Legendary Item", rarity: "legendary", weight: 7/12,   color: "var(--legendary)" },
+    { name: "Common",         rarity: "common",    weight: 50, color: "var(--common)" },
+    { name: "Uncommon",       rarity: "uncommon",  weight: 25, color: "var(--uncommon)" },
+    { name: "Rare Item",      rarity: "rare",      weight: 20, color: "var(--rare)" },
+    { name: "Epic Item",      rarity: "epic",      weight: 4,  color: "var(--epic)" },
+    { name: "Legendary Item", rarity: "legendary", weight: 1,  color: "var(--legendary)" },
   ];
   // -----------------------------------
 
   const card = document.getElementById("card");
   const result = document.getElementById("result");
   const btn = document.getElementById("pullBtn");
+  const bestRankEl = document.getElementById("bestRank");
 
   const totalWeight = pool.reduce((sum, item) => sum + item.weight, 0);
+
+  // Rank order = position in the pool array (last = rarest/best)
+  let bestIndex = -1;
+
+  function updateBestRank(item, index) {
+    if (index > bestIndex) {
+      bestIndex = index;
+      bestRankEl.innerHTML = `Best pull: <b style="color:${item.color}">${item.name}</b>`;
+    }
+  }
 
   function oddsLabel(item) {
     const oneInN = (totalWeight / item.weight).toFixed(1).replace(/\.0$/, "");
@@ -209,6 +232,8 @@
 
     setTimeout(() => {
       const item = pickItem();
+      const index = pool.indexOf(item);
+      updateBestRank(item, index);
 
       card.classList.remove("rolling");
       card.style.setProperty("--glow", item.color);
